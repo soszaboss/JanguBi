@@ -1,0 +1,46 @@
+{
+  "Testaments": [
+    {
+      "Books": [
+        {
+          "Chapters": [
+            {
+              "Verses": [
+                {
+                  "Text": "Au commencement Dieu cr\u00e9a le ciel et la terre."
+                },
+                { "ID": 2, "Text": "La terre \u00e9tait sans forme et vide." },
+                {
+                  "ID": 3,
+                  "Text": "Alors Dieu dit: \u00abQue la lumi\u00e8re paraisse!\u00bb"
+                }
+              ]
+            },
+            {
+              "ID": 2,
+              "Verses": [
+                { "Text": "Ainsi furent achev\u00e9s le ciel et la terre." },
+                { "ID": 2, "Text": "Dieu se reposa le septi\u00e8me jour." }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Books": [
+        {
+          "Chapters": [
+            {
+              "Verses": [
+                { "Text": "Au commencement \u00e9tait la Parole." },
+                { "ID": 2, "Text": "Elle \u00e9tait avec Dieu." },
+                { "ID": 3, "Text": "Tout a \u00e9t\u00e9 fait par elle." }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

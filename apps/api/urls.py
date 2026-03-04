@@ -1,0 +1,19 @@
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
+urlpatterns = [
+    path("v1/", include([
+        path("users/", include(("apps.users.urls", "users"))),
+        path("errors/", include(("apps.errors.urls", "errors"))),
+        path("files/", include(("apps.files.urls", "files"))),
+        path("bible/", include(("apps.bible.urls", "bible"))),
+        path("availability/", include(("apps.availability.urls", "availability"))),
+        path("rosary/", include(("apps.rosary.urls", "rosary"))),
+        path("rag/", include(("apps.rag.urls", "rag"))),
+        path("liturgy/", include(("apps.liturgy.urls", "liturgy"))),
+    ])),
+
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger-ui/', SpectacularSwaggerView.as_view(url_name='api:schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='api:schema'), name='redoc'),
+]

@@ -1,0 +1,142 @@
+# ==============================================================================
+# Configuration de base pour les services applicatifs (Django, Celery, Beats)
+# Cela évite de répéter le build, les volumes et l'environnement partout.
+# ==============================================================================
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: docker/local.Dockerfile
+  volumes:
+    - .:/app
+  env_file:
+    - .env
+  depends_on:
+    db:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  restart: on-failure
+  networks:
+    - app_network
+
+services:
+  # ===========================================
+  # Base de données
+  # ===========================================
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      # Bonne pratique : On utilise les variables du .env plutôt que de les écrire en dur
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      # On utilise aussi l'interpolation ici pour le check
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # ===========================================
+  # Message Broker
+  # ===========================================
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # ===========================================
+  # Cache & Résultats Celery
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # ===========================================
+  # Stockage S3 Local
+  # ===========================================
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      # On utilise les variables du .env
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console Web
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # ===========================================
+  # Application Django Principale
+  # ===========================================
+  django:
+    <<: *app-base
+    container_name: django_web
+    entrypoint: ["/app/entrypoint.sh"]
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+
+  # ===========================================
+  # Workers Asynchrones
+  # ===========================================
+  celery:
+    <<: *app-base
+    container_name: celery_worker
+    command: celery -A apps.tasks worker -l info --concurrency=1 --without-gossip --without-mingle --without-heartbeat
+
+  # ===========================================
+  # Planificateur Tâches
+  # ===========================================
+  beats:
+    <<: *app-base
+    container_name: celery_beat
+    command: celery -A apps.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+volumes:
+  minio_data:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  app_network:
+    driver: bridge

@@ -1,0 +1,1518 @@
+openapi: 3.0.3
+info:
+  title: JanguBi API
+  version: 1.0.0
+  description: API for JanguBi
+paths:
+  /api/v1/availability/available/:
+    get:
+      operationId: v1_availability_available_list
+      summary: Get available ministers for a specific date and service
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: service
+        schema:
+          type: string
+          maxLength: 255
+          minLength: 1
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MinisterList'
+          description: ''
+  /api/v1/availability/calendar/{slug}/:
+    get:
+      operationId: v1_availability_calendar_retrieve
+      summary: Get a minister's availability calendar for a specific month
+      parameters:
+      - in: query
+        name: month
+        schema:
+          type: string
+          maxLength: 7
+          minLength: 1
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthCalendar'
+          description: ''
+  /api/v1/availability/ministers/:
+    get:
+      operationId: v1_availability_ministers_list
+      summary: List all active ministers
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: parish__slug
+        schema:
+          type: string
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - BISHOP
+          - DEACON
+          - PRIEST
+          - RELIGIOUS
+          - SISTER
+        description: |-
+          * `PRIEST` - Priest
+          * `SISTER` - Sister
+          * `DEACON` - Deacon
+          * `RELIGIOUS` - Religious
+          * `BISHOP` - Bishop
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMinisterListList'
+          description: ''
+  /api/v1/availability/ministers/{slug}/:
+    get:
+      operationId: v1_availability_ministers_retrieve
+      summary: Get minister details
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MinisterDetail'
+          description: ''
+  /api/v1/availability/ministers/{slug}/available/:
+    get:
+      operationId: v1_availability_ministers_available_list
+      summary: Get available slots for a minister on a specific date
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Slot'
+          description: ''
+  /api/v1/availability/ministers/{slug}/weekly/:
+    get:
+      operationId: v1_availability_ministers_weekly_list
+      summary: Get minister weekly availability
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWeeklyAvailabilityList'
+          description: ''
+  /api/v1/availability/parishes/:
+    get:
+      operationId: v1_availability_parishes_list
+      summary: List all active parishes
+      parameters:
+      - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: city__icontains
+        schema:
+          type: string
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedParishList'
+          description: ''
+  /api/v1/availability/parishes/{slug}/:
+    get:
+      operationId: v1_availability_parishes_retrieve
+      summary: Get parish details
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Availability
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Parish'
+          description: ''
+  /api/v1/bible/books/:
+    get:
+      operationId: v1_bible_books_list
+      description: Returns paginated list of all books, optionally filtered by testament.
+      summary: List all books with optional testament filter
+      parameters:
+      - in: query
+        name: testament
+        schema:
+          type: string
+          minLength: 1
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookMetadataOutput'
+          description: ''
+  /api/v1/bible/books/{book_id}/:
+    get:
+      operationId: v1_bible_books_retrieve
+      description: Returns metadata for a specific book, optionally expanding chapters.
+      summary: Get book metadata
+      parameters:
+      - in: path
+        name: book_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+        description: Pass 'chapters' to include chapters metadata
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetailOutput'
+          description: ''
+  /api/v1/bible/books/{book_id}/chapters/:
+    get:
+      operationId: v1_bible_books_chapters_list
+      description: Returns list of chapters for a book.
+      summary: List chapters for a specific book
+      parameters:
+      - in: path
+        name: book_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChapterMetadataOutput'
+          description: ''
+  /api/v1/bible/books/{book_id}/chapters/{chapter_number}/verses/:
+    get:
+      operationId: v1_bible_books_chapters_verses_list
+      description: Returns list of verses for a specific chapter.
+      summary: List verses for a specific chapter
+      parameters:
+      - in: path
+        name: book_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: chapter_number
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: excerpt
+        schema:
+          type: boolean
+        description: If true, truncates text to shorter excerpt
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VerseOutput'
+          description: ''
+  /api/v1/bible/daily-texts/:
+    get:
+      operationId: v1_bible_daily_texts_list
+      description: Returns AELF daily texts.
+      summary: Get paginated list of AELF daily texts
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyTextOutput'
+          description: ''
+  /api/v1/bible/import/:
+    post:
+      operationId: v1_bible_import_create
+      description: Admin-only endpoint to trigger a background import.
+      summary: Trigger background import of Bible texts
+      tags:
+      - Bible
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Input'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Input'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Input'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/bible/search/:
+    get:
+      operationId: v1_bible_search_list
+      description: Search endpoint using lexical/hybrid search.
+      summary: Lexical and hybrid search across all verses
+      parameters:
+      - in: query
+        name: hybrid
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          maximum: 500
+          default: 50
+      - in: query
+        name: q
+        schema:
+          type: string
+          minLength: 3
+        required: true
+      - in: query
+        name: testament
+        schema:
+          type: string
+          minLength: 1
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchBookGroupOutput'
+          description: ''
+  /api/v1/bible/testaments/:
+    get:
+      operationId: v1_bible_testaments_list
+      description: Returns the lists of testaments (Ancien & Nouveau).
+      summary: List all testaments (Ancien & Nouveau)
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestamentOutput'
+          description: ''
+  /api/v1/bible/testaments/{testament_slug}/books/:
+    get:
+      operationId: v1_bible_testaments_books_list
+      description: Returns all books for a given testament.
+      summary: List all books for a specific testament
+      parameters:
+      - in: path
+        name: testament_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Bible
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookMetadataOutput'
+          description: ''
+  /api/v1/errors/trigger/:
+    get:
+      operationId: v1_errors_trigger_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/errors/trigger/exception/:
+    get:
+      operationId: v1_errors_trigger_exception_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/errors/trigger/unique/:
+    get:
+      operationId: v1_errors_trigger_unique_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/files/upload/direct/finish/:
+    post:
+      operationId: v1_files_upload_direct_finish_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/files/upload/direct/local/{file_id}/:
+    post:
+      operationId: v1_files_upload_direct_local_create
+      parameters:
+      - in: path
+        name: file_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/files/upload/direct/start/:
+    post:
+      operationId: v1_files_upload_direct_start_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/files/upload/standard/:
+    post:
+      operationId: v1_files_upload_standard_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/rag/query/:
+    post:
+      operationId: v1_rag_query_create
+      description: |-
+        Asynchronous RAG Chat endpoint.
+        Accepts a user query, routes it via Gemini (extracted domain intent),
+        fetches database contexts optimally via Django ORM (sync_to_async),
+        and finally queries Gemini a second time to build a cohesive response.
+      summary: Ask a question to the AI assistant using RAG (Retrieval-Augmented Generation)
+      tags:
+      - RAG
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RagQuery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RagQuery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RagQuery'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RagResponse'
+          description: ''
+  /api/v1/rosary/days/today/:
+    get:
+      operationId: v1_rosary_days_today_retrieve
+      summary: Get today's rosary prayers along with standalone prayers
+      tags:
+      - Rosary
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodayRosaryOutput'
+          description: ''
+  /api/v1/rosary/groups/:
+    get:
+      operationId: v1_rosary_groups_list
+      summary: List all rosary groups (groups of mysteries)
+      tags:
+      - Rosary
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+          description: ''
+  /api/v1/rosary/groups/{slug}/:
+    get:
+      operationId: v1_rosary_groups_retrieve
+      summary: Get details of a specific rosary group by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Rosary
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: ''
+  /api/v1/rosary/search/:
+    get:
+      operationId: v1_rosary_search_list
+      summary: Search within rosary prayers using text match
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+      tags:
+      - Rosary
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchPrayer'
+          description: ''
+  /api/v1/rosary/vector_search/:
+    get:
+      operationId: v1_rosary_vector_search_list
+      description: Stub endpoint for future RAG implementation via pgvector.
+      summary: Search within rosary prayers using vector embeddings
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Semantic search query
+      tags:
+      - Rosary
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchPrayer'
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: v1_users_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/{user_id}/:
+    get:
+      operationId: v1_users_retrieve_2
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/{user_id}/update/:
+    post:
+      operationId: v1_users_update_create
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/users/create/:
+    post:
+      operationId: v1_users_create_create
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    BookDetailOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        testament:
+          type: string
+          readOnly: true
+        verse_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterMetadataOutput'
+          readOnly: true
+      required:
+      - chapters
+      - id
+      - name
+      - order
+      - slug
+      - testament
+    BookMetadataOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        testament:
+          type: string
+          readOnly: true
+        verse_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - id
+      - name
+      - order
+      - slug
+      - testament
+    ChapterMetadataOutput:
+      type: object
+      properties:
+        number:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        name:
+          type: string
+          maxLength: 255
+        verse_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - number
+    DailyTextOutput:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+          maxLength: 64
+        title:
+          type: string
+          maxLength: 255
+        content:
+          type: string
+        source_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        local_matches: {}
+      required:
+      - category
+      - content
+      - date
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        mysteries:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - mysteries
+      - name
+      - slug
+    Input:
+      type: object
+      properties:
+        file_path:
+          type: string
+        source:
+          type: string
+      required:
+      - file_path
+      - source
+    MinisterDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 255
+        last_name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        role_display:
+          type: string
+          readOnly: true
+        parish:
+          allOf:
+          - $ref: '#/components/schemas/Parish'
+          readOnly: true
+        bio:
+          type: string
+        is_active:
+          type: boolean
+        weekly_availabilities:
+          type: string
+          readOnly: true
+      required:
+      - first_name
+      - id
+      - last_name
+      - parish
+      - role_display
+      - slug
+      - weekly_availabilities
+    MinisterList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 255
+        last_name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        role_display:
+          type: string
+          readOnly: true
+        parish:
+          allOf:
+          - $ref: '#/components/schemas/Parish'
+          readOnly: true
+        is_active:
+          type: boolean
+      required:
+      - first_name
+      - id
+      - last_name
+      - parish
+      - role_display
+      - slug
+    MonthCalendar:
+      type: object
+      properties:
+        available_days:
+          type: array
+          items:
+            type: string
+            format: date
+        full_days:
+          type: array
+          items:
+            type: string
+            format: date
+        partial_days:
+          type: array
+          items:
+            type: string
+            format: date
+      required:
+      - available_days
+      - full_days
+      - partial_days
+    PaginatedMinisterListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinisterList'
+    PaginatedParishList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parish'
+    PaginatedWeeklyAvailabilityList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeeklyAvailability'
+    Parish:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        address:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          maxLength: 255
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        is_active:
+          type: boolean
+      required:
+      - city
+      - id
+      - name
+      - slug
+    Prayer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        type_display:
+          type: string
+          readOnly: true
+        language:
+          type: string
+          maxLength: 10
+        text:
+          type: string
+      required:
+      - id
+      - text
+      - type
+      - type_display
+    RagQuery:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The question or prompt to ask the assistant (e.g., 'Quel mystère
+            aujourd'hui et as-tu un prêtre dispo à Mbour ?')
+      required:
+      - query
+    RagResponse:
+      type: object
+      properties:
+        answer:
+          type: string
+          description: The generated response from the LLM.
+        context:
+          type: string
+          description: The raw context retrieved from the database.
+        intent:
+          type: object
+          additionalProperties: {}
+          description: The metadata showing how the LLM routed the question.
+      required:
+      - answer
+      - context
+      - intent
+    RoleEnum:
+      enum:
+      - PRIEST
+      - SISTER
+      - DEACON
+      - RELIGIOUS
+      - BISHOP
+      type: string
+      description: |-
+        * `PRIEST` - Priest
+        * `SISTER` - Sister
+        * `DEACON` - Deacon
+        * `RELIGIOUS` - Religious
+        * `BISHOP` - Bishop
+    RosaryDay:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        weekday_display:
+          type: string
+          readOnly: true
+        group:
+          allOf:
+          - $ref: '#/components/schemas/Group'
+          readOnly: true
+      required:
+      - group
+      - id
+      - weekday
+      - weekday_display
+    SearchBookGroupOutput:
+      type: object
+      description: Shape of search results grouped by book.
+      properties:
+        book:
+          $ref: '#/components/schemas/SearchBookMetadataOutput'
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchMatchOutput'
+      required:
+      - book
+      - matches
+    SearchBookMetadataOutput:
+      type: object
+      description: Shape of book metadata returned by search service.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        order:
+          type: integer
+        testament:
+          type: string
+      required:
+      - id
+      - name
+      - order
+      - slug
+      - testament
+    SearchMatchOutput:
+      type: object
+      description: Shape of the search result specific to a matching verse.
+      properties:
+        verse:
+          $ref: '#/components/schemas/SearchVerseOutput'
+        no_internal_source:
+          type: boolean
+          default: false
+        score:
+          type: number
+          format: double
+      required:
+      - verse
+    SearchPrayer:
+      type: object
+      description: Extends PrayerSerializer to show rank from full text search.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        type_display:
+          type: string
+          readOnly: true
+        language:
+          type: string
+          maxLength: 10
+        text:
+          type: string
+        rank:
+          type: number
+          format: double
+          readOnly: true
+      required:
+      - id
+      - rank
+      - text
+      - type
+      - type_display
+    SearchVerseOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+        number:
+          type: integer
+        chapter:
+          type: object
+          additionalProperties: {}
+        text:
+          type: string
+      required:
+      - chapter
+      - id
+      - number
+      - text
+    ServiceType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        duration_minutes:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - id
+      - name
+      - slug
+    Slot:
+      type: object
+      properties:
+        start:
+          type: string
+          format: time
+        end:
+          type: string
+          format: time
+        service:
+          type: string
+        service_name:
+          type: string
+      required:
+      - end
+      - service
+      - service_name
+      - start
+    TestamentOutput:
+      type: object
+      properties:
+        slug:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 200
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - name
+      - slug
+    TodayRosaryOutput:
+      type: object
+      properties:
+        day:
+          $ref: '#/components/schemas/RosaryDay'
+        standalone_prayers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prayer'
+      required:
+      - day
+      - standalone_prayers
+    TypeEnum:
+      enum:
+      - SIGN_OF_CROSS
+      - CREED
+      - OUR_FATHER
+      - HAIL_MARY
+      - GLORY_BE
+      - FATIMA
+      - HOLY_QUEEN
+      - FINAL_PRAYER
+      - OTHER
+      type: string
+      description: |-
+        * `SIGN_OF_CROSS` - Sign of Cross
+        * `CREED` - Apostles Creed
+        * `OUR_FATHER` - Our Father
+        * `HAIL_MARY` - Hail Mary
+        * `GLORY_BE` - Glory Be
+        * `FATIMA` - Fatima Prayer
+        * `HOLY_QUEEN` - Hail Holy Queen
+        * `FINAL_PRAYER` - Final Prayer
+        * `OTHER` - Other
+    VerseOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        number:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        text:
+          type: string
+      required:
+      - id
+      - number
+      - text
+    WeekdayEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      type: integer
+      description: |-
+        * `0` - Monday
+        * `1` - Tuesday
+        * `2` - Wednesday
+        * `3` - Thursday
+        * `4` - Friday
+        * `5` - Saturday
+        * `6` - Sunday
+    WeeklyAvailability:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        weekday:
+          allOf:
+          - $ref: '#/components/schemas/WeekdayEnum'
+          minimum: -2147483648
+          maximum: 2147483647
+        weekday_display:
+          type: string
+          readOnly: true
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        service_type:
+          allOf:
+          - $ref: '#/components/schemas/ServiceType'
+          readOnly: true
+      required:
+      - end_time
+      - id
+      - service_type
+      - start_time
+      - weekday
+      - weekday_display
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

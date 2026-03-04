@@ -1,0 +1,444 @@
+# Book mapping: canonical French names, English/French aliases, testament, and order.
+# Order follows the Catholic canon (73 books).
+
+# ===== ANCIEN TESTAMENT =====
+
+Genèse:
+  canonical_name: "Genèse"
+  aliases: ["Genesis", "Gen", "Gn"]
+  testament: "ancien"
+  order: 1
+
+Exode:
+  canonical_name: "Exode"
+  aliases: ["Exodus", "Exo", "Ex"]
+  testament: "ancien"
+  order: 2
+
+Lévitique:
+  canonical_name: "Lévitique"
+  aliases: ["Leviticus", "Lev", "Lv"]
+  testament: "ancien"
+  order: 3
+
+Nombres:
+  canonical_name: "Nombres"
+  aliases: ["Numbers", "Num", "Nb"]
+  testament: "ancien"
+  order: 4
+
+Deutéronome:
+  canonical_name: "Deutéronome"
+  aliases: ["Deuteronomy", "Deut", "Dt"]
+  testament: "ancien"
+  order: 5
+
+Josué:
+  canonical_name: "Josué"
+  aliases: ["Joshua", "Josh", "Jos"]
+  testament: "ancien"
+  order: 6
+
+Juges:
+  canonical_name: "Juges"
+  aliases: ["Judges", "Judg", "Jg"]
+  testament: "ancien"
+  order: 7
+
+Ruth:
+  canonical_name: "Ruth"
+  aliases: ["Ruth", "Rt"]
+  testament: "ancien"
+  order: 8
+
+1 Samuel:
+  canonical_name: "1 Samuel"
+  aliases: ["I Samuel", "1Sam", "1 S"]
+  testament: "ancien"
+  order: 9
+
+2 Samuel:
+  canonical_name: "2 Samuel"
+  aliases: ["II Samuel", "2Sam", "2 S"]
+  testament: "ancien"
+  order: 10
+
+1 Rois:
+  canonical_name: "1 Rois"
+  aliases: ["I Kings", "1Kings", "1 R"]
+  testament: "ancien"
+  order: 11
+
+2 Rois:
+  canonical_name: "2 Rois"
+  aliases: ["II Kings", "2Kings", "2 R"]
+  testament: "ancien"
+  order: 12
+
+1 Chroniques:
+  canonical_name: "1 Chroniques"
+  aliases: ["I Chronicles", "1Chr", "1 Ch"]
+  testament: "ancien"
+  order: 13
+
+2 Chroniques:
+  canonical_name: "2 Chroniques"
+  aliases: ["II Chronicles", "2Chr", "2 Ch"]
+  testament: "ancien"
+  order: 14
+
+Esdras:
+  canonical_name: "Esdras"
+  aliases: ["Ezra", "Esd"]
+  testament: "ancien"
+  order: 15
+
+Néhémie:
+  canonical_name: "Néhémie"
+  aliases: ["Nehemiah", "Neh", "Né"]
+  testament: "ancien"
+  order: 16
+
+Tobie:
+  canonical_name: "Tobie"
+  aliases: ["Tobit", "Tb"]
+  testament: "ancien"
+  order: 17
+
+Judith:
+  canonical_name: "Judith"
+  aliases: ["Judith", "Jdt"]
+  testament: "ancien"
+  order: 18
+
+Esther:
+  canonical_name: "Esther"
+  aliases: ["Esther", "Est"]
+  testament: "ancien"
+  order: 19
+
+1 Maccabées:
+  canonical_name: "1 Maccabées"
+  aliases: ["1 Maccabees", "1Mac", "1 M"]
+  testament: "ancien"
+  order: 20
+
+2 Maccabées:
+  canonical_name: "2 Maccabées"
+  aliases: ["2 Maccabees", "2Mac", "2 M"]
+  testament: "ancien"
+  order: 21
+
+Job:
+  canonical_name: "Job"
+  aliases: ["Job", "Jb"]
+  testament: "ancien"
+  order: 22
+
+Psaumes:
+  canonical_name: "Psaumes"
+  aliases: ["Psalms", "Psalm", "Psaume", "Ps"]
+  testament: "ancien"
+  order: 23
+
+Proverbes:
+  canonical_name: "Proverbes"
+  aliases: ["Proverbs", "Prov", "Pr"]
+  testament: "ancien"
+  order: 24
+
+Ecclésiaste:
+  canonical_name: "Ecclésiaste"
+  aliases: ["Ecclesiastes", "Eccl", "Qo"]
+  testament: "ancien"
+  order: 25
+
+Cantique des Cantiques:
+  canonical_name: "Cantique des Cantiques"
+  aliases: ["Song of Solomon", "Song of Songs", "SoS", "Ct"]
+  testament: "ancien"
+  order: 26
+
+Sagesse:
+  canonical_name: "Sagesse"
+  aliases: ["Wisdom", "Wis", "Sg"]
+  testament: "ancien"
+  order: 27
+
+Siracide:
+  canonical_name: "Siracide"
+  aliases: ["Sirach", "Ecclesiasticus", "Sir", "Si"]
+  testament: "ancien"
+  order: 28
+
+Isaïe:
+  canonical_name: "Isaïe"
+  aliases: ["Isaiah", "Isa", "Is"]
+  testament: "ancien"
+  order: 29
+
+Jérémie:
+  canonical_name: "Jérémie"
+  aliases: ["Jeremiah", "Jer", "Jr"]
+  testament: "ancien"
+  order: 30
+
+Lamentations:
+  canonical_name: "Lamentations"
+  aliases: ["Lamentations", "Lam", "Lm"]
+  testament: "ancien"
+  order: 31
+
+Baruch:
+  canonical_name: "Baruch"
+  aliases: ["Baruch", "Bar", "Ba"]
+  testament: "ancien"
+  order: 32
+
+Ézéchiel:
+  canonical_name: "Ézéchiel"
+  aliases: ["Ezekiel", "Ezek", "Ez"]
+  testament: "ancien"
+  order: 33
+
+Daniel:
+  canonical_name: "Daniel"
+  aliases: ["Daniel", "Dan", "Dn"]
+  testament: "ancien"
+  order: 34
+
+Osée:
+  canonical_name: "Osée"
+  aliases: ["Hosea", "Hos", "Os"]
+  testament: "ancien"
+  order: 35
+
+Joël:
+  canonical_name: "Joël"
+  aliases: ["Joel", "Jl"]
+  testament: "ancien"
+  order: 36
+
+Amos:
+  canonical_name: "Amos"
+  aliases: ["Amos", "Am"]
+  testament: "ancien"
+  order: 37
+
+Abdias:
+  canonical_name: "Abdias"
+  aliases: ["Obadiah", "Obad", "Ab"]
+  testament: "ancien"
+  order: 38
+
+Jonas:
+  canonical_name: "Jonas"
+  aliases: ["Jonah", "Jon"]
+  testament: "ancien"
+  order: 39
+
+Michée:
+  canonical_name: "Michée"
+  aliases: ["Micah", "Mic", "Mi"]
+  testament: "ancien"
+  order: 40
+
+Nahum:
+  canonical_name: "Nahum"
+  aliases: ["Nahum", "Nah", "Na"]
+  testament: "ancien"
+  order: 41
+
+Habacuc:
+  canonical_name: "Habacuc"
+  aliases: ["Habakkuk", "Hab", "Ha"]
+  testament: "ancien"
+  order: 42
+
+Sophonie:
+  canonical_name: "Sophonie"
+  aliases: ["Zephaniah", "Zeph", "So"]
+  testament: "ancien"
+  order: 43
+
+Aggée:
+  canonical_name: "Aggée"
+  aliases: ["Haggai", "Hag", "Ag"]
+  testament: "ancien"
+  order: 44
+
+Zacharie:
+  canonical_name: "Zacharie"
+  aliases: ["Zechariah", "Zech", "Za"]
+  testament: "ancien"
+  order: 45
+
+Malachie:
+  canonical_name: "Malachie"
+  aliases: ["Malachi", "Mal", "Ml"]
+  testament: "ancien"
+  order: 46
+
+# ===== NOUVEAU TESTAMENT =====
+
+Matthieu:
+  canonical_name: "Matthieu"
+  aliases: ["Matthew", "Matt", "Mt"]
+  testament: "nouveau"
+  order: 47
+
+Marc:
+  canonical_name: "Marc"
+  aliases: ["Mark", "Mk", "Mc"]
+  testament: "nouveau"
+  order: 48
+
+Luc:
+  canonical_name: "Luc"
+  aliases: ["Luke", "Lk", "Lc"]
+  testament: "nouveau"
+  order: 49
+
+Jean:
+  canonical_name: "Jean"
+  aliases: ["John", "Jn"]
+  testament: "nouveau"
+  order: 50
+
+Actes:
+  canonical_name: "Actes"
+  aliases: ["Acts", "Ac"]
+  testament: "nouveau"
+  order: 51
+
+Romains:
+  canonical_name: "Romains"
+  aliases: ["Romans", "Rom", "Rm"]
+  testament: "nouveau"
+  order: 52
+
+1 Corinthiens:
+  canonical_name: "1 Corinthiens"
+  aliases: ["I Corinthians", "1Cor", "1 Co"]
+  testament: "nouveau"
+  order: 53
+
+2 Corinthiens:
+  canonical_name: "2 Corinthiens"
+  aliases: ["II Corinthians", "2Cor", "2 Co"]
+  testament: "nouveau"
+  order: 54
+
+Galates:
+  canonical_name: "Galates"
+  aliases: ["Galatians", "Gal", "Ga"]
+  testament: "nouveau"
+  order: 55
+
+Éphésiens:
+  canonical_name: "Éphésiens"
+  aliases: ["Ephesians", "Eph", "Ep"]
+  testament: "nouveau"
+  order: 56
+
+Philippiens:
+  canonical_name: "Philippiens"
+  aliases: ["Philippians", "Phil", "Ph"]
+  testament: "nouveau"
+  order: 57
+
+Colossiens:
+  canonical_name: "Colossiens"
+  aliases: ["Colossians", "Col"]
+  testament: "nouveau"
+  order: 58
+
+1 Thessaloniciens:
+  canonical_name: "1 Thessaloniciens"
+  aliases: ["I Thessalonians", "1Thess", "1 Th"]
+  testament: "nouveau"
+  order: 59
+
+2 Thessaloniciens:
+  canonical_name: "2 Thessaloniciens"
+  aliases: ["II Thessalonians", "2Thess", "2 Th"]
+  testament: "nouveau"
+  order: 60
+
+1 Timothée:
+  canonical_name: "1 Timothée"
+  aliases: ["I Timothy", "1Tim", "1 Tm"]
+  testament: "nouveau"
+  order: 61
+
+2 Timothée:
+  canonical_name: "2 Timothée"
+  aliases: ["II Timothy", "2Tim", "2 Tm"]
+  testament: "nouveau"
+  order: 62
+
+Tite:
+  canonical_name: "Tite"
+  aliases: ["Titus", "Tit", "Tt"]
+  testament: "nouveau"
+  order: 63
+
+Philémon:
+  canonical_name: "Philémon"
+  aliases: ["Philemon", "Phlm", "Phm"]
+  testament: "nouveau"
+  order: 64
+
+Hébreux:
+  canonical_name: "Hébreux"
+  aliases: ["Hebrews", "Heb", "He"]
+  testament: "nouveau"
+  order: 65
+
+Jacques:
+  canonical_name: "Jacques"
+  aliases: ["James", "Jas", "Jc"]
+  testament: "nouveau"
+  order: 66
+
+1 Pierre:
+  canonical_name: "1 Pierre"
+  aliases: ["I Peter", "1Pet", "1 P"]
+  testament: "nouveau"
+  order: 67
+
+2 Pierre:
+  canonical_name: "2 Pierre"
+  aliases: ["II Peter", "2Pet", "2 P"]
+  testament: "nouveau"
+  order: 68
+
+1 Jean:
+  canonical_name: "1 Jean"
+  aliases: ["I John", "1John", "1 Jn"]
+  testament: "nouveau"
+  order: 69
+
+2 Jean:
+  canonical_name: "2 Jean"
+  aliases: ["II John", "2John", "2 Jn"]
+  testament: "nouveau"
+  order: 70
+
+3 Jean:
+  canonical_name: "3 Jean"
+  aliases: ["III John", "3John", "3 Jn"]
+  testament: "nouveau"
+  order: 71
+
+Jude:
+  canonical_name: "Jude"
+  aliases: ["Jude", "Jd"]
+  testament: "nouveau"
+  order: 72
+
+Apocalypse:
+  canonical_name: "Apocalypse"
+  aliases: ["Revelation", "Rev", "Ap"]
+  testament: "nouveau"
+  order: 73
