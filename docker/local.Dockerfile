@@ -9,7 +9,13 @@ ENV PYTHONUNBUFFERED 1
 ADD requirements/ requirements/
 RUN pip install -r requirements/local.txt
 
+# ---- Universal CRLF fix ----
+# Copy entrypoint OUTSIDE /app so the bind mount won't overwrite it.
+# Use sed to strip any \r (Windows CRLF) and make it executable.
+COPY entrypoint.sh /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
+
 # Get the django project into the docker container
-RUN mkdir /app
+RUN mkdir -p /app
 WORKDIR /app
 ADD ./ /app/

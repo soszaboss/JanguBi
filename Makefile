@@ -1,4 +1,11 @@
-.PHONY: up down restart build logs shell dbshell makemigrations migrate check test init-data create-admin init-all
+# Charge les variables du .env comme variables Make (le '-' ignore l'erreur si .env absent)
+-include .env
+export
+
+.PHONY: up down restart build logs shell dbshell makemigrations migrate check test \
+       init-data create-admin init-all createsuperuser import-aelf clear-cache \
+       flush-redis flush-db seed-availability check-embeddings seed-embeddings \
+       celery-logs celery-restart rabbitmq-stats clean-audio
 
 # ==============================================================================
 # COMMANDES DOCKER
@@ -19,13 +26,13 @@ logs:
 	docker compose logs -f django
 
 # ==============================================================================
-# COMMANDES DJANGO (Méthode 1 / Manuel)
+# COMMANDES DJANGO (exécutées dans le container)
 # ==============================================================================
 shell:
 	docker compose exec django python manage.py shell
 
 dbshell:
-	docker compose exec db psql -U postgres -d styleguide_example_db
+	docker compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 makemigrations:
 	docker compose exec django python manage.py makemigrations
@@ -43,8 +50,7 @@ createsuperuser:
 	docker compose exec django python manage.py createsuperuser
 
 import-aelf:
-	$(eval TODAY := $(shell date +%Y-%m-%d))
-	docker compose exec django python manage.py import_aelf --start $(TODAY) --end $(TODAY)
+	docker compose exec django python manage.py import_aelf --start $(shell python -c "import datetime; print(datetime.date.today())") --end $(shell python -c "import datetime; print(datetime.date.today())")
 
 clear-cache:
 	docker compose exec django python manage.py shell -c "from django.core.cache import cache; cache.clear()"
@@ -83,14 +89,35 @@ clean-audio:
 	docker compose exec django python manage.py shell -c "import os; from django.conf import settings; path = os.path.join(settings.MEDIA_ROOT, 'rosary'); [os.remove(os.path.join(path, f)) for f in os.listdir(path) if f.endswith('.mp3')]; print('Local audio cache cleaned.')"
 
 # ==============================================================================
-# INITIALISATION DU PROJET
+# INITIALISATION DU PROJET (cross-platform, ne requiert pas bash sur l'hôte)
 # ==============================================================================
 init-data:
-	chmod +x ./scripts/init_bible_data.sh
-	./scripts/init_bible_data.sh
+	@echo "==========================================================="
+	@echo "   Initialisation de la base de donnees Bible"
+	@echo "==========================================================="
+	@echo "1. Application des migrations Django..."
+	docker compose exec django python manage.py migrate
+	@echo "2. Importation du format A (bible-fr.json)..."
+	docker compose exec django python manage.py import_bible init/bibles/format/json/bible-fr.json --source bible_fr
+	@echo "3. Importation du format B (FreSynodale1921.json)..."
+	docker compose exec django python manage.py import_bible init/bibles/format/json/FreSynodale1921.json --source FreSynodale1921
+	@echo "4. Execution du script conditionnel pgvector..."
+	docker compose exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < init/postgresql/pgvector_conditional.sql
+	@echo "5. Creation et configuration du bucket MinIO..."
+	docker compose exec minio sh -c "mc alias set local http://localhost:9000 $(MINIO_ROOT_USER) $(MINIO_ROOT_PASSWORD) && mc mb local/rosary-audio || true && mc anonymous set public local/rosary-audio"
+	@echo "6. Importation des donnees du Rosaire..."
+	docker compose exec django python manage.py seed_rosary
+	@echo "7. Importation de la liturgie du jour (AELF)..."
+	docker compose exec django python manage.py import_aelf --start $(shell python -c "import datetime; print(datetime.date.today())") --end $(shell python -c "import datetime; print(datetime.date.today())")
+	@echo "==========================================================="
+	@echo "   Importation et Indexation terminees !"
+	@echo "==========================================================="
 
 create-admin:
-	chmod +x ./scripts/create_admin.sh
-	./scripts/create_admin.sh
+	@echo "==========================================================="
+	@echo "   Creation du Super Administrateur"
+	@echo "==========================================================="
+	docker compose exec django python manage.py init_admin
 
 init-all: init-data create-admin
+

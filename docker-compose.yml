@@ -5,7 +5,7 @@
 x-app-base: &app-base
   build:
     context: .
-    dockerfile: docker/local.Dockerfile
+    dockerfile: docker/production.Dockerfile
   volumes:
     - .:/app
   env_file:
@@ -110,8 +110,9 @@ services:
   django:
     <<: *app-base
     container_name: django_web
-    entrypoint: ["/app/entrypoint.sh"]
-    command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: ["/docker-entrypoint.sh"]
+    #command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn config.wsgi:application -b 0.0.0.0:8000 --workers 4 --threads 2
     ports:
       - "8000:8000"
 
