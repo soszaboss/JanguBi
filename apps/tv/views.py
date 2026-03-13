@@ -4,12 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.tv.models import Category, Video
-from apps.tv.permissions import IsAdminOrReadOnly
+#from apps.tv.permissions import IsAdminOrReadOnly
 from apps.tv.serializers import CategorySerializer, VideoCreateUpdateSerializer, VideoListSerializer
 
 
 class CategoryListApi(APIView):
-    permission_classes = [IsAdminOrReadOnly]
+    #permission_classes = [IsAdminOrReadOnly]
 
     @extend_schema(
         tags=["TV"],
@@ -37,7 +37,7 @@ class CategoryListApi(APIView):
 
 
 class CategoryDetailApi(APIView):
-    permission_classes = [IsAdminOrReadOnly]
+    #permission_classes = [IsAdminOrReadOnly]
 
     def _get_category(self, slug):
         category = Category.objects.filter(slug=slug).first()
@@ -104,7 +104,7 @@ class CategoryDetailApi(APIView):
 
 
 class VideoListApi(APIView):
-    permission_classes = [IsAdminOrReadOnly]
+    #permission_classes = [IsAdminOrReadOnly]
 
     @extend_schema(
         tags=["TV"],
@@ -145,7 +145,7 @@ class VideoListApi(APIView):
 
 
 class VideoDetailApi(APIView):
-    permission_classes = [IsAdminOrReadOnly]
+    #permission_classes = [IsAdminOrReadOnly]
 
     def _get_video(self, video_id):
         video = Video.objects.select_related("category").filter(id=video_id).first()
