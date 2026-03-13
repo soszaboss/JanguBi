@@ -5,7 +5,7 @@ export
 .PHONY: up down restart build logs shell dbshell makemigrations migrate check test \
        init-data create-admin init-all createsuperuser import-aelf clear-cache \
        flush-redis flush-db seed-availability check-embeddings seed-embeddings \
-       celery-logs celery-restart rabbitmq-stats clean-audio
+	celery-logs celery-restart rabbitmq-stats clean-audio collectstatic
 
 # ==============================================================================
 # COMMANDES DOCKER
@@ -42,6 +42,9 @@ migrate:
 
 check:
 	docker compose exec django python manage.py check
+
+collectstatic:
+	docker compose exec django python manage.py collectstatic --noinput
 
 test:
 	docker compose exec django pytest
