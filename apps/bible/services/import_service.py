@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import yaml
 from enum import Enum
 from pathlib import Path
@@ -103,6 +102,8 @@ class ImportService:
     def import_file(self, file_path: str, source_name: str):
         """Main entry point to import a JSON file."""
         logger.info(f"Starting import from {file_path} as '{source_name}'")
+
+        self._purge_source_data(source_name)
         
         with open(file_path, "r", encoding="utf-8-sig") as f:
             data = json.load(f)
@@ -115,6 +116,22 @@ class ImportService:
             raise ValueError(f"Unknown JSON format in {file_path}")
             
         logger.info(f"Import from {source_name} complete.")
+
+    def _purge_source_data(self, source_name: str):
+        """Deletes all verses for a source, then prunes empty chapters/books."""
+        with transaction.atomic():
+            deleted_verses, _ = Verse.objects.filter(source_file=source_name).delete()
+
+            deleted_chapters, _ = Chapter.objects.filter(verses__isnull=True).distinct().delete()
+            deleted_books, _ = Book.objects.filter(chapters__isnull=True).distinct().delete()
+
+        logger.info(
+            "Purged source '%s': verses=%s, chapters=%s, books=%s",
+            source_name,
+            deleted_verses,
+            deleted_chapters,
+            deleted_books,
+        )
 
     def _import_format_a(self, data: Dict[str, Any], source_name: str):
         """

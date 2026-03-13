@@ -223,6 +223,7 @@ class SearchApi(APIView):
         testament = serializers.CharField(required=False, allow_blank=True, allow_null=True)
         book_slug = serializers.CharField(required=False, allow_blank=True, allow_null=True)
         chapter_number = serializers.IntegerField(required=False, allow_null=True)
+        source = serializers.CharField(required=False, allow_blank=True, allow_null=True, default="bible_fr")
         hybrid = serializers.BooleanField(default=False)
         limit = serializers.IntegerField(default=50, max_value=500)
 
@@ -248,6 +249,7 @@ class SearchApi(APIView):
             testament_slug=data.get("testament"),
             book_slug=data.get("book_slug"),
             chapter_number=data.get("chapter_number"),
+            source_file=data.get("source"),
             limit=data["limit"],
             use_hybrid=data["hybrid"]
         )

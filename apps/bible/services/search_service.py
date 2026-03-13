@@ -22,7 +22,7 @@ class SearchService:
     def search(
         self, query: str, testament_slug: Optional[str] = None, 
         book_slug: Optional[str] = None, chapter_number: Optional[int] = None,
-        limit: int = 100, use_hybrid: bool = False
+        limit: int = 100, use_hybrid: bool = False, source_file: Optional[str] = "bible_fr"
     ) -> List[Dict]:
         """
         Main entrypoint for search.
@@ -35,15 +35,15 @@ class SearchService:
 
         # Force lexical if pgvector is off
         if use_hybrid and self.pgvector_enabled:
-            raw_results = self._hybrid_search(clean_query, testament_slug, book_slug, chapter_number, limit)
+            raw_results = self._hybrid_search(clean_query, testament_slug, book_slug, chapter_number, limit, source_file=source_file)
         else:
-            raw_results = self._lexical_search(clean_query, testament_slug, book_slug, chapter_number, limit)
+            raw_results = self._lexical_search(clean_query, testament_slug, book_slug, chapter_number, limit, source_file=source_file)
 
         return self._group_results_by_book(raw_results)
 
     def _lexical_search(
         self, query: str, testament_slug: Optional[str], 
-        book_slug: Optional[str], chapter_number: Optional[int], limit: int
+        book_slug: Optional[str], chapter_number: Optional[int], limit: int, source_file: Optional[str] = "bible_fr"
     ) -> List[Dict]:
         """Performs Postgres full-text search using tsvector."""
         sql = f"""
@@ -61,7 +61,7 @@ class SearchService:
         """
         params = [query, query]
 
-        sql, params = self._apply_filters(sql, params, testament_slug, book_slug, chapter_number)
+        sql, params = self._apply_filters(sql, params, testament_slug, book_slug, chapter_number, source_file)
         
         sql += " ORDER BY score DESC, b.order, c.number, v.number LIMIT %s"
         params.append(limit)
@@ -70,12 +70,12 @@ class SearchService:
 
     def _hybrid_search(
         self, query: str, testament_slug: Optional[str], 
-        book_slug: Optional[str], chapter_number: Optional[int], limit: int, alpha: float = 0.7
+        book_slug: Optional[str], chapter_number: Optional[int], limit: int, alpha: float = 0.7, source_file: Optional[str] = "bible_fr"
     ) -> List[Dict]:
         """Combines pgvector HNSW distance with full-text search rank."""
         query_vector = self.embedding_service.compute_query_embedding(query)
         if not query_vector:
-            return self._lexical_search(query, testament_slug, book_slug, chapter_number, limit)
+            return self._lexical_search(query, testament_slug, book_slug, chapter_number, limit, source_file=source_file)
 
         vector_str = "[" + ",".join(str(f) for f in query_vector) + "]"
 
@@ -94,7 +94,7 @@ class SearchService:
         
         params = [vector_str, query]
         
-        sql, params = self._apply_filters(sql, params, testament_slug, book_slug, chapter_number)
+        sql, params = self._apply_filters(sql, params, testament_slug, book_slug, chapter_number, source_file)
             
         sql += f"""
             )
@@ -117,8 +117,11 @@ class SearchService:
 
         return self._execute_search_query(sql, params)
 
-    def _apply_filters(self, sql: str, params: list, testament_slug: Optional[str], book_slug: Optional[str], chapter_number: Optional[int]):
+    def _apply_filters(self, sql: str, params: list, testament_slug: Optional[str], book_slug: Optional[str], chapter_number: Optional[int], source_file: Optional[str] = "bible_fr"):
         """Évite d'écrire la même logique d'ajout de paramètres WHERE pour chaque méthode de recherche."""
+        if source_file:
+            sql += " AND v.source_file = %s"
+            params.append(source_file)
         if testament_slug:
             sql += " AND t.slug = %s"
             params.append(testament_slug)

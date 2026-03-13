@@ -5,7 +5,7 @@ export
 .PHONY: up down restart build logs shell dbshell makemigrations migrate check test \
        init-data create-admin init-all createsuperuser import-aelf clear-cache \
        flush-redis flush-db seed-availability check-embeddings seed-embeddings \
-	celery-logs celery-restart rabbitmq-stats clean-audio collectstatic
+	celery-logs celery-restart rabbitmq-stats clean-audio collectstatic reinit-bible
 
 # ==============================================================================
 # COMMANDES DOCKER
@@ -76,6 +76,12 @@ check-embeddings:
 seed-embeddings:
 	docker compose exec django python manage.py shell -c "from apps.bible.models import Book; from apps.bible.tasks import compute_embeddings_task; [compute_embeddings_task.delay(b.id) for b in Book.objects.all()]; print('Dispatched embedding tasks for all books.')"
 
+reinit-bible:
+	docker compose exec django python manage.py shell -c "from apps.bible.models import Verse, Chapter, Book, DailyText; Verse.objects.all().delete(); Chapter.objects.all().delete(); Book.objects.all().delete(); DailyText.objects.all().delete(); print('Bible data cleared.')"
+	docker compose exec django python manage.py import_bible init/bibles/format/json/bible-fr.json --source bible_fr
+	docker compose exec django python manage.py import_aelf --start "$$(date +%Y-%m-%d)" --end "$$(python3 -c 'from datetime import datetime, timedelta; print((datetime.now() + timedelta(days=(6 - datetime.now().weekday()))).date())')"
+	docker compose exec django python manage.py shell -c "from django.core.cache import cache; cache.clear(); print('Cache cleared.')"
+
 # ==============================================================================
 # INFRASTRUCTURE & MAINTENANCE
 # ==============================================================================
@@ -102,8 +108,8 @@ init-data:
 	docker compose exec django python manage.py migrate
 	@echo "2. Importation du format A (bible-fr.json)..."
 	docker compose exec django python manage.py import_bible init/bibles/format/json/bible-fr.json --source bible_fr
-	@echo "3. Importation du format B (FreSynodale1921.json)..."
-	docker compose exec django python manage.py import_bible init/bibles/format/json/FreSynodale1921.json --source FreSynodale1921
+	@echo "3. Importation du format B (FreSynodale1921.json) [desactivee par defaut pour eviter le melange de sources]..."
+	# docker compose exec django python manage.py import_bible init/bibles/format/json/FreSynodale1921.json --source FreSynodale1921
 	@echo "4. Execution du script conditionnel pgvector..."
 	docker compose exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < init/postgresql/pgvector_conditional.sql
 	@echo "5. Creation et configuration du bucket MinIO..."
