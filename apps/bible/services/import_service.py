@@ -162,12 +162,15 @@ class ImportService:
             ordered_books = ordered_by_testament.get(testament_slug, [])
             books_data = testament_data.get("Books", [])
 
+            logger.info(
+                "Format A mapping for testament '%s': source_books=%s, mapped_books=%s",
+                testament_slug,
+                len(books_data),
+                len(ordered_books),
+            )
+
             for local_idx, b_data in enumerate(books_data):
-                source_book_id = b_data.get("ID")
-                if isinstance(source_book_id, int) and source_book_id > 0:
-                    mapped_idx = source_book_id - 1
-                else:
-                    mapped_idx = local_idx
+                mapped_idx = local_idx
 
                 if mapped_idx < len(ordered_books):
                     canonical_name = ordered_books[mapped_idx]["canonical_name"]
