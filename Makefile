@@ -53,7 +53,7 @@ createsuperuser:
 	docker compose exec django python manage.py createsuperuser
 
 import-aelf:
-	docker compose exec django python manage.py import_aelf --start $(shell python -c "import datetime; print(datetime.date.today())") --end $(shell python -c "import datetime; print(datetime.date.today())")
+	docker compose exec django python manage.py import_aelf --start "$$(date +%Y-%m-%d)" --end "$$(python3 -c 'from datetime import datetime, timedelta; print((datetime.now() + timedelta(days=(6 - datetime.now().weekday()))).date())')"
 
 clear-cache:
 	docker compose exec django python manage.py shell -c "from django.core.cache import cache; cache.clear()"
@@ -111,7 +111,7 @@ init-data:
 	@echo "6. Importation des donnees du Rosaire..."
 	docker compose exec django python manage.py seed_rosary
 	@echo "7. Importation de la liturgie du jour (AELF)..."
-	docker compose exec django python manage.py import_aelf --start $(shell python -c "import datetime; print(datetime.date.today())") --end $(shell python -c "import datetime; print(datetime.date.today())")
+	docker compose exec django python manage.py import_aelf --start "$$(date +%Y-%m-%d)" --end "$$(python3 -c 'from datetime import datetime, timedelta; print((datetime.now() + timedelta(days=(6 - datetime.now().weekday()))).date())')"
 	@echo "==========================================================="
 	@echo "   Importation et Indexation terminees !"
 	@echo "==========================================================="

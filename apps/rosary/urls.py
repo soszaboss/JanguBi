@@ -27,5 +27,5 @@ urlpatterns = [
     
     # Search
     path("search/", RosarySearchApi.as_view(), name="search"),
-    path("vector_search/", RosaryVectorSearchApi.as_view(), name="vector-search"),
+    #path("vector_search/", RosaryVectorSearchApi.as_view(), name="vector-search"),
 ]
