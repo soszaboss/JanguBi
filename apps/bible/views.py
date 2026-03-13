@@ -152,6 +152,7 @@ class VerseListApi(APIView):
     class FilterSerializer(serializers.Serializer):
         excerpt = serializers.BooleanField(required=False, default=False)
         verses = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+        source = serializers.CharField(required=False, allow_blank=True, allow_null=True, default="bible_fr")
 
     @extend_schema(
         parameters=[
@@ -171,6 +172,10 @@ class VerseListApi(APIView):
         qs = Verse.objects.filter(
             chapter__book_id=book_id, chapter__number=chapter_number
         ).order_by("number")
+
+        source_param = filters_serializer.validated_data.get("source")
+        if source_param:
+            qs = qs.filter(source_file=source_param)
         
         verses_param = filters_serializer.validated_data.get("verses")
         if verses_param:

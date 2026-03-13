@@ -83,6 +83,21 @@ class ImportService:
                 "alt_names": aliases,
             }
         )
+
+        if not created:
+            update_fields = []
+            if book.testament_id != testament.id:
+                book.testament = testament
+                update_fields.append("testament")
+            if book.order != order:
+                book.order = order
+                update_fields.append("order")
+            if aliases and book.alt_names != aliases:
+                book.alt_names = aliases
+                update_fields.append("alt_names")
+            if update_fields:
+                book.save(update_fields=update_fields)
+
         return book
 
     def import_file(self, file_path: str, source_name: str):
@@ -113,26 +128,37 @@ class ImportService:
         ]
         """
         testaments_data = data["Testaments"]
-        
-        # Format A doesn't have explicit book names, just structures.
-        # We rely on the order matching our canonical list if possible.
-        # Format A: bible-fr.json seems to have 66 or 73 books in sequential order.
-        # Let's flatten our mapping by order to assign names.
-        ordered_books = sorted(self.mapping.values(), key=lambda x: x["order"])
-        
-        book_index = 0
-        for testament_data in testaments_data:
+
+        ordered_by_testament = {
+            "ancien": sorted(
+                [book for book in self.mapping.values() if book.get("testament") == "ancien"],
+                key=lambda x: x["order"],
+            ),
+            "nouveau": sorted(
+                [book for book in self.mapping.values() if book.get("testament") == "nouveau"],
+                key=lambda x: x["order"],
+            ),
+        }
+
+        for testament_idx, testament_data in enumerate(testaments_data):
+            testament_slug = "ancien" if testament_idx == 0 else "nouveau"
+            ordered_books = ordered_by_testament.get(testament_slug, [])
             books_data = testament_data.get("Books", [])
-            for b_data in books_data:
-                # Assign name by index
-                if book_index < len(ordered_books):
-                    canonical_name = ordered_books[book_index]["canonical_name"]
+
+            for local_idx, b_data in enumerate(books_data):
+                source_book_id = b_data.get("ID")
+                if isinstance(source_book_id, int) and source_book_id > 0:
+                    mapped_idx = source_book_id - 1
                 else:
-                    canonical_name = f"Livre Inconnu {book_index + 1}"
-                    
+                    mapped_idx = local_idx
+
+                if mapped_idx < len(ordered_books):
+                    canonical_name = ordered_books[mapped_idx]["canonical_name"]
+                else:
+                    canonical_name = f"Livre Inconnu {testament_slug} {mapped_idx + 1}"
+
                 book = self.get_or_create_book(canonical_name)
                 self._import_chapters(book, b_data.get("Chapters", []), source_name, ImportFormat.FORMAT_A)
-                book_index += 1
 
     def _import_format_b(self, data: Dict[str, Any], source_name: str):
         """
