@@ -57,6 +57,7 @@ LOCAL_APPS = [
     "apps.rosary.apps.RosaryConfig",
     "apps.rag.apps.RagConfig",
     "apps.liturgy.apps.LiturgyConfig",
+    "apps.tv.apps.TvConfig",
     #"apps.blog_examples.apps.BlogExamplesConfig",
 ]
 
@@ -195,6 +196,9 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',
     ]
 }
+
+YOUTUBE_API_KEY = env.str("YOUTUBE_API_KEY", default="")
+
 
 CACHES = {
     "default": {

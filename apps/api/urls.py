@@ -9,6 +9,7 @@ urlpatterns = [
         path("bible/", include(("apps.bible.urls", "bible"))),
         path("availability/", include(("apps.availability.urls", "availability"))),
         path("rosary/", include(("apps.rosary.urls", "rosary"))),
+        path("tv/", include(("apps.tv.urls", "tv"))),
         #path("rag/", include(("apps.rag.urls", "rag"))),
         path("liturgy/", include(("apps.liturgy.urls", "liturgy"))),
     ])),
