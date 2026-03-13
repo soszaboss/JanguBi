@@ -107,7 +107,7 @@ init-data:
 	@echo "4. Execution du script conditionnel pgvector..."
 	docker compose exec -T db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) < init/postgresql/pgvector_conditional.sql
 	@echo "5. Creation et configuration du bucket MinIO..."
-	docker compose exec minio sh -c "mc alias set local http://localhost:9000 $(MINIO_ROOT_USER) $(MINIO_ROOT_PASSWORD) && mc mb local/rosary-audio || true && mc anonymous set public local/rosary-audio"
+	docker compose exec minio sh -c "mc alias set local $(AWS_S3_ENDPOINT_URL) $(MINIO_ROOT_USER) $(MINIO_ROOT_PASSWORD) && mc mb local/rosary-audio || true && mc anonymous set public local/rosary-audio"
 	@echo "6. Importation des donnees du Rosaire..."
 	docker compose exec django python manage.py seed_rosary
 	@echo "7. Importation de la liturgie du jour (AELF)..."
