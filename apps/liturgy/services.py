@@ -189,7 +189,7 @@ class AelfService:
             await cls._save_readings_sync(ld, payloads["messes"])
 
         # 5. Map Offices
-        office_types = ["laudes", "vepres", "complies"]
+        office_types = ["laudes", "tierce", "sexte", "none", "vepres", "complies", "lectures"]
         for ot in office_types:
             if ot in payloads and payloads[ot]:
                 await cls._save_office_sync(ld, ot, payloads[ot])

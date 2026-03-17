@@ -7,13 +7,162 @@ from rest_framework import status
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from asgiref.sync import sync_to_async
 
-from apps.liturgy.models import LiturgicalDate, Reading, Office
+from apps.liturgy.models import LiturgicalDate, Reading, Office, AelfResource
 from apps.liturgy.serializers import (
     LiturgicalDateSerializer,
     ReadingSerializer,
-    OfficeSerializer
+    OfficeSerializer,
+    AelfResourceSerializer
 )
+from apps.liturgy.services import AelfService
+import asyncio
+
+
+class DailyLiturgyBaseApi(APIView):
+    """
+    Base API view for Daily Liturgy endpoints.
+    Provides common logic for date/zone parsing and automatic synchronization.
+    """
+    permission_classes = [AllowAny]
+
+    def get_params(self, request):
+        date_str = request.query_params.get("date")
+        zone = request.query_params.get("zone", "romain")
+        
+        if not date_str:
+            date_str = timezone.localtime().date().isoformat()
+            
+        return date_str, zone
+
+    async def ensure_data(self, date_str, zone):
+        """Checks if data exists, otherwise syncs from AELF."""
+        try:
+            target_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return None, False
+
+        exists = await sync_to_async(LiturgicalDate.objects.filter(date=target_date, zone=zone).exists)()
+        
+        if not exists:
+            # Sync data from AELF
+            await AelfService.sync_daily_data(date_str, zone)
+            
+        date_obj = await sync_to_async(lambda: LiturgicalDate.objects.filter(date=target_date, zone=zone).prefetch_related(
+            "readings__matched_verses", "offices"
+        ).first())()
+        
+        return date_obj, True
+
+
+class LiturgyInformationsApi(DailyLiturgyBaseApi):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("date", OpenApiTypes.STR, description="Date in YYYY-MM-DD format (default: today)"),
+            OpenApiParameter("zone", OpenApiTypes.STR, description="Liturgical zone (default: romain)"),
+        ],
+        responses=LiturgicalDateSerializer,
+        tags=["Liturgy V1"],
+        summary="Informations about the specified date and zone.",
+    )
+    def get(self, request):
+        date_str, zone = self.get_params(request)
+        from asgiref.sync import async_to_sync
+        
+        date_obj, valid_date = async_to_sync(self.ensure_data)(date_str, zone)
+        
+        if not valid_date:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not date_obj:
+            return Response({"error": "Data not available."}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = LiturgicalDateSerializer(date_obj)
+        return Response(serializer.data)
+
+
+class LiturgyMessesApi(DailyLiturgyBaseApi):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("date", OpenApiTypes.STR, description="Date in YYYY-MM-DD format (default: today)"),
+            OpenApiParameter("zone", OpenApiTypes.STR, description="Liturgical zone (default: romain)"),
+        ],
+        responses=ReadingSerializer(many=True),
+        tags=["Liturgy V1"],
+        summary="Mass(es) for the specified date and zone.",
+    )
+    def get(self, request):
+        date_str, zone = self.get_params(request)
+        from asgiref.sync import async_to_sync
+        
+        date_obj, valid_date = async_to_sync(self.ensure_data)(date_str, zone)
+        
+        if not valid_date:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not date_obj:
+            return Response({"error": "Data not available."}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = ReadingSerializer(date_obj.readings.all(), many=True)
+        return Response(serializer.data)
+
+
+class LiturgyOfficeApi(DailyLiturgyBaseApi):
+    office_type = None
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("date", OpenApiTypes.STR, description="Date in YYYY-MM-DD format (default: today)"),
+            OpenApiParameter("zone", OpenApiTypes.STR, description="Liturgical zone (default: romain)"),
+        ],
+        responses=OfficeSerializer,
+        tags=["Liturgy V1"],
+        summary="Office for the specified date and zone.",
+    )
+    def get(self, request):
+        if not self.office_type:
+            return Response({"error": "Office type not configured."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        date_str, zone = self.get_params(request)
+        from asgiref.sync import async_to_sync
+        
+        date_obj, valid_date = async_to_sync(self.ensure_data)(date_str, zone)
+        
+        if not valid_date:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not date_obj:
+            return Response({"error": "Data not available."}, status=status.HTTP_404_NOT_FOUND)
+            
+        office = date_obj.offices.filter(office_type=self.office_type).first()
+        if not office:
+             return Response({"error": f"Office {self.office_type} not found for this date."}, status=status.HTTP_404_NOT_FOUND)
+             
+        serializer = OfficeSerializer(office)
+        return Response(serializer.data)
+
+
+class LiturgyLaudesApi(LiturgyOfficeApi):
+    office_type = "laudes"
+
+class LiturgyTierceApi(LiturgyOfficeApi):
+    office_type = "tierce"
+
+class LiturgySexteApi(LiturgyOfficeApi):
+    office_type = "sexte"
+
+class LiturgyNoneApi(LiturgyOfficeApi):
+    office_type = "none"
+
+class LiturgyVepresApi(LiturgyOfficeApi):
+    office_type = "vepres"
+
+class LiturgyCompliesApi(LiturgyOfficeApi):
+    office_type = "complies"
+
+class LiturgyLecturesApi(LiturgyOfficeApi):
+    office_type = "lectures"
 
 
 class LiturgyTodayApi(APIView):
@@ -35,6 +184,13 @@ class LiturgyTodayApi(APIView):
         date_obj = LiturgicalDate.objects.filter(date=today, zone="romain").prefetch_related(
             "readings__matched_verses", "offices"
         ).first()
+
+        if not date_obj:
+            from asgiref.sync import async_to_sync
+            async_to_sync(AelfService.sync_daily_data)(today.isoformat(), "romain")
+            date_obj = LiturgicalDate.objects.filter(date=today, zone="romain").prefetch_related(
+                "readings__matched_verses", "offices"
+            ).first()
 
         if not date_obj:
             return Response(
@@ -60,14 +216,14 @@ class LiturgyDateApi(APIView):
         summary="Get Liturgical data for a specific date",
         description="""
         Retrieve the liturgical texts for a specific date (YYYY-MM-DD).
-        If the data is not available locally, this endpoint returns a 404.
+        If the data is not available locally, it syncs from AELF.
         """
     )
     def get(self, request, date_str):
         from django.core.cache import cache
         
         # 1. Vérifie le cache MANUELLEMENT pour éviter les 404 indésirables
-        cache_key = f"liturgy_date_api_v1_{date_str}"
+        cache_key = f"liturgy_date_api_v2_{date_str}"
         cached_data = cache.get(cache_key)
         if cached_data:
             return Response(cached_data)
@@ -81,10 +237,16 @@ class LiturgyDateApi(APIView):
             "readings__matched_verses", "offices"
         ).first()
 
-        # 2. Si ça n'existe pas ENCORE, on ne met PAS en cache !
+        if not date_obj:
+            from asgiref.sync import async_to_sync
+            async_to_sync(AelfService.sync_daily_data)(date_str, "romain")
+            date_obj = LiturgicalDate.objects.filter(date=target_date, zone="romain").prefetch_related(
+                "readings__matched_verses", "offices"
+            ).first()
+
         if not date_obj:
             return Response(
-                {"error": f"Liturgy data for {date_str} not found in database."}, 
+                {"error": f"Liturgy data for {date_str} not found."}, 
                 status=status.HTTP_404_NOT_FOUND
             )
 
