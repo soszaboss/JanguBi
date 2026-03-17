@@ -139,27 +139,82 @@ class AelfService:
     @staticmethod
     @sync_to_async
     def _save_office_sync(ld: LiturgicalDate, office_type: str, office_json: Dict[str, Any]):
-        """Parses Laudes, Vepres etc. payloads"""
-        # Office returns a dict {"office": {...}} sometimes or just the raw dict
+        """Parses Laudes, Vepres etc. payloads with high accuracy for AELF structure."""
         data = office_json.get(office_type, office_json)
         if not data:
             return
+
+        # 1. Extract Hymn (often a dict with "texte")
+        hymne_data = data.get("hymne")
+        hymn_text = ""
+        if isinstance(hymne_data, dict):
+            hymn_text = hymne_data.get("texte", "")
+        elif isinstance(hymne_data, str):
+            hymn_text = hymne_data
+
+        # 2. Consolidate Psalms
+        psalms = []
+        for i in range(1, 4):
+            ps_key = f"psaume_{i}"
+            ant_key = f"antienne_{i}"
+            if ps_key in data or ant_key in data:
+                psalms.append({
+                    "number": i,
+                    "antienne": data.get(ant_key, ""),
+                    "psaume": data.get(ps_key, {})
+                })
+
+        # 3. Extract Canticle based on office
+        canticle_text = ""
+        canticle_keys = {
+            "laudes": "cantique_zacharie",
+            "vepres": "cantique_mariale",
+            "complies": "cantique_symeon"
+        }
+        c_key = canticle_keys.get(office_type)
+        if c_key and c_key in data:
+            c_data = data.get(c_key)
+            if isinstance(c_data, dict):
+                canticle_text = c_data.get("texte", "")
+            else:
+                canticle_text = str(c_data)
+
+        # 4. Extract Readings/Pericope
+        readings = []
+        if office_type == "lectures":
+            # For Office of Readings, we have two main blocks
+            if "lecture" in data:
+                readings.append(data["lecture"])
+            if "texte_patristique" in data:
+                readings.append({
+                    "titre": data.get("titre_patristique", "Texte Patristique"),
+                    "texte": data.get("texte_patristique"),
+                    "repons": data.get("repons_patristique")
+                })
+        else:
+            # For others, it's usually "pericope"
+            pericope = data.get("pericope")
+            if pericope:
+                readings = [pericope] if not isinstance(pericope, list) else pericope
+
+        # 5. Extract Intercessions
+        intercession = data.get("intercession", "")
 
         Office.objects.update_or_create(
             liturgical_date=ld,
             office_type=office_type,
             defaults={
-                "hymn": str(data.get("hymne", "")),
-                "psalms": data.get("psaumes", []),
-                "canticle": str(data.get("cantique", "")),
-                "readings": data.get("lecture", []) if isinstance(data.get("lecture"), list) else [data.get("lecture", {})],
-                "intercessions": str(data.get("intercession", "")),
+                "hymn": hymn_text,
+                "psalms": psalms,
+                "canticle": canticle_text,
+                "readings": readings,
+                "intercessions": str(intercession),
                 "raw_metadata": data
             }
         )
 
     @classmethod
-    async def sync_daily_data(cls, date_str: str, zone: str = "romain") -> None:
+    async def sync_daily_data(cls, date_str: str, zone: str = "afrique") -> None:
         """
         Orchestrates fetching ALL daily endpoints concurrently,
         then synchronously saving them to the DB.

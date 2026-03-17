@@ -29,7 +29,7 @@ class DailyLiturgyBaseApi(APIView):
 
     def get_params(self, request):
         date_str = request.query_params.get("date")
-        zone = request.query_params.get("zone", "romain")
+        zone = request.query_params.get("zone", "afrique")
         
         if not date_str:
             date_str = timezone.localtime().date().isoformat()
@@ -181,14 +181,14 @@ class LiturgyTodayApi(APIView):
     @method_decorator(cache_page(60 * 60 * 1))
     def get(self, request):
         today = timezone.localtime().date()
-        date_obj = LiturgicalDate.objects.filter(date=today, zone="romain").prefetch_related(
+        date_obj = LiturgicalDate.objects.filter(date=today, zone="afrique").prefetch_related(
             "readings__matched_verses", "offices"
         ).first()
 
         if not date_obj:
             from asgiref.sync import async_to_sync
-            async_to_sync(AelfService.sync_daily_data)(today.isoformat(), "romain")
-            date_obj = LiturgicalDate.objects.filter(date=today, zone="romain").prefetch_related(
+            async_to_sync(AelfService.sync_daily_data)(today.isoformat(), "afrique")
+            date_obj = LiturgicalDate.objects.filter(date=today, zone="afrique").prefetch_related(
                 "readings__matched_verses", "offices"
             ).first()
 
@@ -233,14 +233,14 @@ class LiturgyDateApi(APIView):
         except ValueError:
             return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        date_obj = LiturgicalDate.objects.filter(date=target_date, zone="romain").prefetch_related(
+        date_obj = LiturgicalDate.objects.filter(date=target_date, zone="afrique").prefetch_related(
             "readings__matched_verses", "offices"
         ).first()
 
         if not date_obj:
             from asgiref.sync import async_to_sync
-            async_to_sync(AelfService.sync_daily_data)(date_str, "romain")
-            date_obj = LiturgicalDate.objects.filter(date=target_date, zone="romain").prefetch_related(
+            async_to_sync(AelfService.sync_daily_data)(date_str, "afrique")
+            date_obj = LiturgicalDate.objects.filter(date=target_date, zone="afrique").prefetch_related(
                 "readings__matched_verses", "offices"
             ).first()
 
