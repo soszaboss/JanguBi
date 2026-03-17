@@ -110,6 +110,9 @@ class AelfAsyncClient:
             "messes": f"/v1/messes/{date_str}/{zone}",
             "lectures": f"/v1/lectures/{date_str}/{zone}", # Office des lectures
             "laudes": f"/v1/laudes/{date_str}/{zone}",
+            "tierce": f"/v1/tierce/{date_str}/{zone}",
+            "sexte": f"/v1/sexte/{date_str}/{zone}",
+            "none": f"/v1/none/{date_str}/{zone}",
             "vepres": f"/v1/vepres/{date_str}/{zone}",
             "complies": f"/v1/complies/{date_str}/{zone}"
         }
