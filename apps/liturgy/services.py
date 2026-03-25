@@ -37,14 +37,15 @@ class AelfService:
     @sync_to_async
     def _get_or_create_liturgical_date(dt_str: str, zone: str, info_data: Dict[str, Any]) -> LiturgicalDate:
         """Parses the /informations endpoint dict into the local LiturgicalDate model."""
+        info = info_data.get("informations", {})
         ld, _ = LiturgicalDate.objects.update_or_create(
             date=dt_str,
             zone=zone,
             defaults={
-                "day_name": info_data.get("informations", {}).get("jour", ""),
-                "season": info_data.get("informations", {}).get("temps", ""),
-                "mystery": info_data.get("informations", {}).get("fete", ""),
-                "notes": info_data.get("informations", {}).get("couleur", "")
+                "day_name": info.get("jour") or "",
+                "season": info.get("temps") or "",
+                "mystery": info.get("fete") or "",
+                "notes": info.get("couleur") or "",
             }
         )
         return ld
